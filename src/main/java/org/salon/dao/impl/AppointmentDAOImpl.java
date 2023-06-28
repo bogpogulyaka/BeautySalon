@@ -17,8 +17,9 @@ public class AppointmentDAOImpl implements AppointmentDAO {
     private static final String SQL_SELECT_ALL_APPOINTMENTS = "SELECT * FROM appointment";
     private static final String SQL_SELECT_APPOINTMENT_BY_CLIENT_ID = "SELECT * FROM appointment WHERE client_id = ?";
     private static final String SQL_SELECT_APPOINTMENT_BY_EMPLOYEE_ID = "SELECT * FROM appointment WHERE employee_id = ?";
+    private static final String SQL_SELECT_APPOINTMENT_BY_STATUS = "SELECT * FROM appointment WHERE status = ?";
 //    private static final String SQL_SELECT_APPOINTMENT_BY_TIME_INTERVAL = "SELECT * FROM appointment WHERE start_datetime >= ? AND ";
-    private static final String SQL_ADD_APPOINTMENT = "INSERT INTO appointment + " +
+    private static final String SQL_ADD_APPOINTMENT = "INSERT INTO appointment " +
             "(client_id, employee_id, start_datetime, finish_datetime, status) VALUES(?, ?, ?, ?, ?)";
     private static final String SQL_UPDATE_APPOINTMENT = "UPDATE appointment SET " +
             "client_id = ?, employee_id = ?, start_datetime = ?, finish_datetime = ?, status = ?, WHERE id = ?";
@@ -37,7 +38,7 @@ public class AppointmentDAOImpl implements AppointmentDAO {
             long clientId = rs.getLong("client_id");
             long employeeId = rs.getLong("employee_id");
             LocalDateTime startDateTime = rs.getObject("start_datetime", LocalDateTime.class);
-            LocalDateTime finishDateTime = rs.getObject("end_datetime", LocalDateTime.class);
+            LocalDateTime finishDateTime = rs.getObject("finish_datetime", LocalDateTime.class);
             var status = Appointment.Status.valueOf(rs.getString("status"));
 
             User client = new UserDAOImpl(con).get(clientId);
@@ -165,7 +166,7 @@ public class AppointmentDAOImpl implements AppointmentDAO {
 
     @Override
     public List<Appointment> getByStatus(Appointment.Status status) {
-        try (PreparedStatement stmt = con.prepareStatement(SQL_SELECT_APPOINTMENT_BY_EMPLOYEE_ID)) {
+        try (PreparedStatement stmt = con.prepareStatement(SQL_SELECT_APPOINTMENT_BY_STATUS)) {
             stmt.setString(1, status.toString());
             List<Appointment> appointments = new ArrayList<>();
             try (ResultSet rs = stmt.executeQuery()){

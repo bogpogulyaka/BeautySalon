@@ -14,4 +14,8 @@ public class ScheduleInterval {
     private User employee;
     private LocalDateTime startDateTime;
     private LocalDateTime finishDateTime;
+
+    public String toString() {
+        return String.format("ScheduleInterval { id: %d, employee: %s, start: %s, end: %s }", id, employee.toString(), startDateTime, finishDateTime);
+    }
 }

@@ -14,13 +14,13 @@ import java.util.List;
 
 public class RoleDAOImpl implements RoleDAO {
 
-    private static final String SQL_SELECT_ROLE_BY_ID = "SELECT * FROM role WHERE id = ?";
-    private static final String SQL_SELECT_ALL_ROLES = "SELECT * FROM role";
-    private static final String SQL_ADD_ROLE = "INSERT INTO role (name) VALUES(?)";
-    private static final String SQL_UPDATE_ROLE = "UPDATE role SET name WHERE id = ?";
-    private static final String SQL_DELETE_ROLE = "DELETE FROM role WHERE id = ?";
-//    private static final String SQL_DELETE_USERS_ROLE = "DELETE FROM user_role WHERE role_id = ?";
-    private static final String SQL_SELECT_USER_ROLES = "SELECT id name FROM user_role ur JOIN role r " +
+    private static final String SQL_SELECT_ROLE_BY_ID = "SELECT * FROM roles WHERE id = ?";
+    private static final String SQL_SELECT_ALL_ROLES = "SELECT * FROM roles";
+    private static final String SQL_SELECT_ROLE_BY_NAME = "SELECT * FROM roles WHERE name = ?";
+    private static final String SQL_ADD_ROLE = "INSERT INTO roles (name) VALUES(?)";
+    private static final String SQL_UPDATE_ROLE = "UPDATE roles SET name WHERE id = ?";
+    private static final String SQL_DELETE_ROLE = "DELETE FROM roles WHERE id = ?";
+    private static final String SQL_SELECT_USER_ROLES = "SELECT id, name FROM user_role ur JOIN roles r " +
             "ON ur.role_id = r.id WHERE ur.user_id = ?";
     private static final String SQL_DELETE_USER_ROLES = "DELETE FROM user_role WHERE user_id = ?";
 
@@ -116,6 +116,21 @@ public class RoleDAOImpl implements RoleDAO {
         } catch (SQLException ex) {
             logger.error("Error. Can't delete role with id " + id + ". " + ex.getMessage());
         }
+    }
+
+    @Override
+    public Role getByName(String name) {
+        try (PreparedStatement stmt = con.prepareStatement(SQL_SELECT_ROLE_BY_NAME)) {
+            stmt.setString(1, name);
+            try(ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return getRole(rs);
+                }
+            }
+        } catch (SQLException ex) {
+            logger.error("Error. Can't find Roel by name " + name + ". " + ex.getMessage());
+        }
+        return null;
     }
 
     @Override

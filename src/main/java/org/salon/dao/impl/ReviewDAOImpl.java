@@ -18,7 +18,7 @@ public class ReviewDAOImpl implements ReviewDAO {
     private static final String SQL_SELECT_REVIEW_BY_ID = "SELECT * FROM review WHERE id = ?";
     private static final String SQL_SELECT_ALL_REVIEWS = "SELECT * FROM review";
     private static final String SQL_SELECT_REVIEW_BY_APPOINTMENT_ID = "SELECT * FROM review WHERE id = ?";
-    private static final String SQL_ADD_REVIEW = "INSERT INTO review + " +
+    private static final String SQL_ADD_REVIEW = "INSERT INTO review " +
             "(appointment_id, content) VALUES(?, ?)";
     private static final String SQL_UPDATE_REVIEW = "UPDATE review SET " +
             "appointment_id = ?, content = ?";
@@ -123,7 +123,7 @@ public class ReviewDAOImpl implements ReviewDAO {
     }
 
     @Override
-    public Review getByAppointmentId(int id) {
+    public Review getByAppointmentId(long id) {
         try (PreparedStatement stmt = con.prepareStatement(SQL_SELECT_REVIEW_BY_APPOINTMENT_ID)) {
             stmt.setLong(1, id);
             try(ResultSet rs = stmt.executeQuery()) {
