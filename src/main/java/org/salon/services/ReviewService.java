@@ -1,125 +1,39 @@
 package org.salon.services;
 
-import org.salon.dao.ReviewDAO;
-import org.salon.dao.impl.ReviewDAOImpl;
 import org.salon.models.Review;
-import org.salon.util.ConnectionPool;
+import org.salon.repository.ReviewRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.sql.Connection;
 import java.util.List;
 
 public class ReviewService {
+    private final ReviewRepository reviewRepository;
     private static final Logger logger = LoggerFactory.getLogger(ReviewService.class);
 
+    @Autowired
+    public ReviewService(ReviewRepository reviewRepository) {
+        this.reviewRepository = reviewRepository;
+    }
+
     public Review getReview(long id) {
-        try (Connection con = ConnectionPool.getConnection()){
-            ReviewDAO reviewDAO = new ReviewDAOImpl(con);
-            try {
-                return reviewDAO.get(id);
-            } catch (Exception ex) {
-                logger.error("Error: " + ex.getMessage());
-            }
-        } catch (Exception ex){
-            logger.error("Error: " + ex.getMessage());
-        }
-        return null;
+        return reviewRepository.findById(id).orElse(null);
     }
-
-    public Review getReviewByAppointmentId(long appointmentId) {
-        try (Connection con = ConnectionPool.getConnection()){
-            ReviewDAO reviewDAO = new ReviewDAOImpl(con);
-            try {
-                return reviewDAO.getByAppointmentId(appointmentId);
-            } catch (Exception ex) {
-                logger.error("Error: " + ex.getMessage());
-            }
-        } catch (Exception ex){
-            logger.error("Error: " + ex.getMessage());
-        }
-        return null;
+    public Review getReviewByAppointmentId(long id) {
+        return reviewRepository.findByAppointmentId(id);
     }
-
     public List<Review> getAllReviews() {
-        try (Connection con = ConnectionPool.getConnection()){
-            ReviewDAO reviewDAO = new ReviewDAOImpl(con);
-            try {
-                return reviewDAO.getAll();
-            } catch (Exception ex) {
-                logger.error("Error: " + ex.getMessage());
-            }
-        } catch (Exception ex){
-            logger.error("Error: " + ex.getMessage());
-        }
-        return null;
+        return reviewRepository.findAll();
     }
-
     public Review createReview(Review review){
-        try (Connection con = ConnectionPool.getConnection()){
-            ReviewDAO reviewDAO = new ReviewDAOImpl(con);
-            try {
-                con.setAutoCommit(false);
-                if (reviewDAO.create(review) != null) {
-                    con.commit();
-                    return review;
-                }
-            } catch (Exception ex) {
-                try {
-                    con.rollback();
-                } catch (Exception e){
-                    logger.error("Error: " + e.getMessage());
-                }
-            } finally {
-                con.setAutoCommit(true);
-            }
-        } catch (Exception ex){
-            logger.error("Error: " + ex.getMessage());
-        }
-        return null;
+        return reviewRepository.save(review);
     }
-
     public void updateReview(Review review){
-        try (Connection con = ConnectionPool.getConnection()){
-            ReviewDAO reviewDAO = new ReviewDAOImpl(con);
-            try {
-                con.setAutoCommit(false);
-                reviewDAO.update(review);
-                con.commit();
-            } catch (Exception ex) {
-                try {
-                    con.rollback();
-                } catch (Exception e){
-                    logger.error("Error: " + e.getMessage());
-                }
-            } finally {
-                con.setAutoCommit(true);
-            }
-        } catch (Exception ex){
-            logger.error("Error: " + ex.getMessage());
-        }
+        reviewRepository.save(review);
     }
-
-    public boolean deleteReview(long id){
-        try (Connection con = ConnectionPool.getConnection()){
-            ReviewDAO reviewDAO = new ReviewDAOImpl(con);
-            try {
-                con.setAutoCommit(false);
-                reviewDAO.delete(id);
-                con.commit();
-                return true;
-            } catch (Exception ex){
-                try {
-                    con.rollback();
-                } catch (Exception e){
-                    logger.error("Error: " + e.getMessage());
-                }
-            } finally {
-                con.setAutoCommit(true);
-            }
-        } catch (Exception ex) {
-            logger.error("Error: " + ex.getMessage());
-        }
-        return false;
+    public void deleteReview(long id){
+        reviewRepository.deleteById(id);
     }
 }

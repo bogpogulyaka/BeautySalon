@@ -15,7 +15,7 @@
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="BeautySalon" options="--add-modules java.sql" />
-      <module name="Salon" options="--add-modules java.sql" />
+      <module name="Salon" options="-parameters" />
     </option>
   </component>
 </project>
