@@ -1,5 +1,6 @@
 package org.salon.dao.impl;
 
+import jakarta.persistence.EntityManager;
 import org.salon.dao.RoleDAO;
 import org.salon.models.Role;
 import org.slf4j.Logger;
@@ -13,136 +14,42 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RoleDAOImpl implements RoleDAO {
-
-    private static final String SQL_SELECT_ROLE_BY_ID = "SELECT * FROM role WHERE id = ?";
-    private static final String SQL_SELECT_ALL_ROLES = "SELECT * FROM role";
-    private static final String SQL_ADD_ROLE = "INSERT INTO role (name) VALUES(?)";
-    private static final String SQL_UPDATE_ROLE = "UPDATE role SET name WHERE id = ?";
-    private static final String SQL_DELETE_ROLE = "DELETE FROM role WHERE id = ?";
-//    private static final String SQL_DELETE_USERS_ROLE = "DELETE FROM user_role WHERE role_id = ?";
-    private static final String SQL_SELECT_USER_ROLES = "SELECT id name FROM user_role ur JOIN role r " +
-            "ON ur.role_id = r.id WHERE ur.user_id = ?";
-    private static final String SQL_DELETE_USER_ROLES = "DELETE FROM user_role WHERE user_id = ?";
-
-    private final Connection con;
-    private static final Logger logger = LoggerFactory.getLogger(UserDAOImpl.class);
-    public RoleDAOImpl(Connection con){
-        this.con = con;
-    }
-
-
-    private Role getRole(ResultSet rs){
-        try {
-            long id = rs.getLong("id");
-            String name = rs.getString("name");
-            return new Role(id, name);
-        }
-        catch (SQLException ex) {
-            logger.error("Error. Can't get role." + ex.getMessage());
-        }
-        return null;
-    }
-
-    private void setRole(PreparedStatement stmt, Role role) throws SQLException{
-        stmt.setString(1, role.getName());
+    private final EntityManager em;
+    private static final Logger logger = LoggerFactory.getLogger(RoleDAOImpl.class);
+    public RoleDAOImpl(EntityManager em){
+        this.em = em;
     }
 
     @Override
     public Role get(long id) {
-        try (PreparedStatement stmt = con.prepareStatement(SQL_SELECT_ROLE_BY_ID)) {
-            stmt.setLong(1, id);
-            try(ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return getRole(rs);
-                }
-            }
-        } catch (SQLException ex) {
-            logger.error("Error. Can't find role by id " + id + ". " + ex.getMessage());
-        }
-        return null;
+        return em.find(Role.class, id);
     }
 
+    @Override
+    public Role getByName(String name){
+        return em.createQuery("SELECT * FROM roles WHERE name = ?", Role.class)
+                .setParameter(1, name)
+                .getSingleResult();
+    }
 
     @Override
     public List<Role> getAll() {
-        try (PreparedStatement stmt = con.prepareStatement(SQL_SELECT_ALL_ROLES)) {
-            List<Role> roles = new ArrayList<>();
-            try(ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    Role role = getRole(rs);
-                    roles.add(role);
-                }
-
-                return roles;
-            }
-        } catch (SQLException ex) {
-            logger.error("Error. Can't get all roles."+ ex.getMessage());
-        }
-        return null;
+        return em.createQuery("SELECT * FROM roles", Role.class).getResultList();
     }
 
     @Override
     public Role create(Role role) {
-        try (PreparedStatement stmt = con.prepareStatement(SQL_ADD_ROLE, PreparedStatement.RETURN_GENERATED_KEYS)) {
-            setRole(stmt, role);
-            stmt.executeUpdate();
-            try (ResultSet rs = stmt.getGeneratedKeys()){
-                if (rs.next()) {
-                    role.setId(rs.getLong(1));
-                }
-            }
-        } catch (SQLException ex) {
-            logger.error("Error. Can't add new role " + role.getName() + ". " + ex.getMessage());
-        }
+        em.persist(role);
         return role;
     }
 
     @Override
     public void update(Role role) {
-        try (PreparedStatement stmt = con.prepareStatement(SQL_UPDATE_ROLE)) {
-            stmt.setLong(1, role.getId());
-            setRole(stmt, role);
-            stmt.executeUpdate();
-        } catch (SQLException ex) {
-            logger.error("Error. Can't update role " + role.getName() + ". " + ex.getMessage());
-        }
+        em.merge(role);
     }
 
     @Override
     public void delete(long id) {
-        try (PreparedStatement stmt = con.prepareStatement(SQL_DELETE_ROLE)) {
-            stmt.setLong(1, id);
-            stmt.executeUpdate();
-        } catch (SQLException ex) {
-            logger.error("Error. Can't delete role with id " + id + ". " + ex.getMessage());
-        }
-    }
-
-    @Override
-    public List<Role> getUserRoles(long userId){
-        try (PreparedStatement stmt = con.prepareStatement(SQL_SELECT_USER_ROLES)){
-            List<Role> userRoles = new ArrayList<>();
-            stmt.setLong(1, userId);
-            try (ResultSet rs = stmt.executeQuery()){
-                while (rs.next()){
-                    Role role = getRole(rs);
-                    userRoles.add(role);
-                }
-                return userRoles;
-            }
-        } catch (SQLException ex) {
-            logger.error("Error. Can't find roles for user with id = " + userId + ". " + ex.getMessage());
-        }
-        return null;
-    }
-
-    @Override
-    public void deleteUserRoles(long userId){
-        try (PreparedStatement stmt = con.prepareStatement(SQL_DELETE_USER_ROLES)){
-            stmt.setLong(1, userId);
-            stmt.executeUpdate();
-        } catch (SQLException ex) {
-            logger.error("Error. Can't delete roles for user with id = " + userId + ". " + ex.getMessage());
-        }
+        em.remove(em.find(Role.class, id));
     }
 }

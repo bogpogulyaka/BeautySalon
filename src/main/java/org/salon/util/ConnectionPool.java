@@ -9,9 +9,9 @@ import java.sql.SQLException;
 public class ConnectionPool {
     private static final BasicDataSource dataSource = new BasicDataSource();
 
-    public static Connection getConnection() throws SQLException, IOException {
+    public static Connection getConnection() throws SQLException {
         try{
-            Class.forName("com.postgresql.jdbc.driver").newInstance();
+            Class.forName("org.postgresql.Driver").newInstance();
         }catch(Exception e){
             e.printStackTrace();
         }
@@ -30,7 +30,7 @@ public class ConnectionPool {
         dataSource.setPassword(password);
         dataSource.setMaxTotal(10);
         dataSource.setMinIdle(5);
-        //dataSource.setDriverClassName("com.postgresql.jdbc.driver");
+        //dataSource.setDriverClassName("org.postgresql.Driver");
 
         return dataSource.getConnection();
     }
