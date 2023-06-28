@@ -14,8 +14,9 @@ import java.util.List;
 public class ScheduleIntervalDAOImpl implements ScheduleIntervalDAO {
     private static final String SQL_SELECT_SCHEDULE_INTERVAL_BY_ID = "SELECT * FROM schedule_interval WHERE id = ?";
     private static final String SQL_SELECT_ALL_SCHEDULE_INTERVALS = "SELECT * FROM schedule_interval";
-    private static final String SQL_ADD_SCHEDULE_INTERVAL = "INSERT INTO schedule_interval + " +
-            "(employee_id, start_datetime, finish_datetime) VALUES(?, ?)";
+    private static final String SQL_SELECT_ALL_SCHEDULE_INTERVALS_BY_EMPLOYEE_ID = "SELECT * FROM schedule_interval WHERE employee_id = ?";
+    private static final String SQL_ADD_SCHEDULE_INTERVAL = "INSERT INTO schedule_interval " +
+            "(employee_id, start_datetime, finish_datetime) VALUES(?, ?, ?)";
     private static final String SQL_UPDATE_SCHEDULE_INTERVAL = "UPDATE schedule_interval SET " +
             "employee_id = ?, start_datetime = ?, finish_datetime = ?";
     private static final String SQL_DELETE_SCHEDULE_INTERVAL = "DELETE FROM schedule_interval WHERE id = ?";
@@ -33,7 +34,7 @@ public class ScheduleIntervalDAOImpl implements ScheduleIntervalDAO {
             long id = rs.getLong("id");
             long employeeId = rs.getLong("employee_id");
             LocalDateTime startDateTime = rs.getObject("start_datetime", LocalDateTime.class);
-            LocalDateTime finishDateTime = rs.getObject("end_finish", LocalDateTime.class);
+            LocalDateTime finishDateTime = rs.getObject("finish_datetime", LocalDateTime.class);
 
             User employee = new UserDAOImpl(con).get(employeeId);
 
@@ -47,8 +48,8 @@ public class ScheduleIntervalDAOImpl implements ScheduleIntervalDAO {
 
     private void setScheduleInterval(PreparedStatement stmt, ScheduleInterval interval) throws SQLException{
         stmt.setLong(1, interval.getEmployee().getId());
-        stmt.setTimestamp(3, Timestamp.valueOf(interval.getStartDateTime()));
-        stmt.setTimestamp(4, Timestamp.valueOf(interval.getFinishDateTime()));
+        stmt.setTimestamp(2, Timestamp.valueOf(interval.getStartDateTime()));
+        stmt.setTimestamp(3, Timestamp.valueOf(interval.getFinishDateTime()));
     }
     
     @Override
@@ -79,7 +80,7 @@ public class ScheduleIntervalDAOImpl implements ScheduleIntervalDAO {
                 return intervals;
             }
         } catch (SQLException ex) {
-            logger.error("Error. Can't get all interval."+ ex.getMessage());
+            logger.error("Error. Can't get all intervals. "+ ex.getMessage());
         }
         return null;
     }
@@ -122,7 +123,21 @@ public class ScheduleIntervalDAOImpl implements ScheduleIntervalDAO {
     }
 
     @Override
-    public List<ScheduleInterval> getByEmployeeIdAndDate(int id, LocalDate date) {
+    public List<ScheduleInterval> getByEmployeeId(long id) {
+        try (PreparedStatement stmt = con.prepareStatement(SQL_SELECT_ALL_SCHEDULE_INTERVALS_BY_EMPLOYEE_ID)) {
+            stmt.setLong(1, id);
+            List<ScheduleInterval> intervals = new ArrayList<>();
+            try(ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    ScheduleInterval interval = getScheduleInterval(rs);
+                    intervals.add(interval);
+                }
+
+                return intervals;
+            }
+        } catch (SQLException ex) {
+            logger.error("Error. Can't get all intervals. "+ ex.getMessage());
+        }
         return null;
     }
 }

@@ -15,14 +15,14 @@ import java.util.List;
 
 public class UserDAOImpl implements UserDAO {
 
-    private static final String SQL_SELECT_USER_BY_ID = "SELECT * FROM user WHERE id = ?";
-    private static final String SQL_SELECT_ALL_USERS = "SELECT * FROM user";
-    private static final String SQL_SELECT_USER_BY_LOGIN = "SELECT * FROM user WHERE login = ?";
-    private static final String SQL_ADD_USER = "INSERT INTO user " +
+    private static final String SQL_SELECT_USER_BY_ID = "SELECT * FROM users WHERE id = ?";
+    private static final String SQL_SELECT_ALL_USERS = "SELECT * FROM users";
+    private static final String SQL_SELECT_USER_BY_LOGIN = "SELECT * FROM users WHERE login = ?";
+    private static final String SQL_ADD_USER = "INSERT INTO users " +
             "(name, surname, login, password) VALUES (?, ?, ?, ?)";
-    private static final String SQL_UPDATE_USER = "UPDATE user SET " +
+    private static final String SQL_UPDATE_USER = "UPDATE users SET " +
             "name = ?, surname = ?, login = ?, password = ? WHERE id = ?";
-    private static final String SQL_DELETE_USER = "DELETE FROM user WHERE id = ?";
+    private static final String SQL_DELETE_USER = "DELETE FROM users WHERE id = ?";
     private static final String SQL_ADD_USER_ROLE = "INSERT INTO user_role (user_id, role_id) VALUES (?, ?)";
 
     private final Connection con;
@@ -44,7 +44,7 @@ public class UserDAOImpl implements UserDAO {
             return new User(id, name, surname, login, password, roles);
         }
         catch (SQLException ex) {
-            logger.error("Error. Can't get User." + ex.getMessage());
+            logger.error("Error. Can't get User. " + ex.getMessage());
         }
         return null;
     }
@@ -85,7 +85,7 @@ public class UserDAOImpl implements UserDAO {
             }
         }
         catch (SQLException ex) {
-            logger.error("Error. Can't get all users." + ex.getMessage());
+            logger.error("Error. Can't get all users. " + ex.getMessage());
         }
         return null;
     }
