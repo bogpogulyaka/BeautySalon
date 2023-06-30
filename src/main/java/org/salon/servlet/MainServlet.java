@@ -25,8 +25,8 @@ public class MainServlet extends HttpServlet {
         logger.info("Command: " + command);
         switch (command) {
             case "appointments" -> {
-                CommandController workdaysCommand = new AppointmentsCommand();
-                workdaysCommand.execute(req, resp);
+                CommandController appointmentsCommand = new AppointmentsCommand();
+                appointmentsCommand.execute(req, resp);
                 resp.sendRedirect("/html/appointments.jsp");
             }
             default -> {
